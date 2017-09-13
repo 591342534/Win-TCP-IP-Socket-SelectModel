@@ -7,8 +7,7 @@
 
 int main()
 {
-	while (true)
-	{
+
 	WSADATA wsdata;
 	int iResult = WSAStartup(MAKEWORD(2, 2), &wsdata);
 	if(iResult !=0)
@@ -31,18 +30,17 @@ int main()
 	si.sin_addr.S_un.S_addr = inet_addr(ip);
 	si.sin_family = AF_INET;
 	si.sin_port = htons(10086);
-
-	
-	int iconSta=connect(hSocketCoont, (sockaddr *)&si, sizeof(sockaddr_in));
+	int iconSta = connect(hSocketCoont, (sockaddr *)&si, sizeof(sockaddr_in));
 	if (iconSta == SOCKET_ERROR)
 	{
 		printf("connect  error,code: %d", WSAGetLastError());
 		//return 0;
 	}
+	while (true)
+	{
 
-	char senBuff[1024] = {0};
 
-	
+		char senBuff[1024] = {0};
 		printf("输入你要发送的内容  \n");
 		scanf_s("%s", senBuff, sizeof(senBuff));
 		int sendCout = send(hSocketCoont, senBuff, (int)strlen(senBuff) + 1, 0);
@@ -64,12 +62,17 @@ int main()
 		printf("Bytes recvCount：%d \n", recvCount);
 		//shutdown(hSocketCoont, SD_RECEIVE);
 		printf("FORM SERVICE:\n %s\n", recvBuff);
-	
+
+		if (strcmp(recvBuff,"close")==0)
+		{
+			break;
+		}
+
+	}
 	closesocket(hSocketCoont);
 	WSACleanup();
 
 
-	}
     return 1;
 
 }

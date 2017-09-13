@@ -5,7 +5,7 @@
 #include <locale.h>
 #include <winsock2.h>
 
-
+DWORD WINAPI ThreadProc(_In_ LPVOID lpParameter);
 int main()
 {
 	//setlocale(LC_ALL, "");
@@ -53,8 +53,21 @@ int main()
 			return 0;
 		}
 
-		char recvBuf[1024] = {0};
-		int recvCount = recv(hsocketAccept, recvBuf, 1024, 0);
+		HANDLE cthread=CreateThread(NULL, 0, ThreadProc, (LPVOID)hsocketAccept, 0, NULL);
+		CloseHandle(cthread);
+		
+	}
+	WSACleanup();
+    return 1;
+}
+
+
+DWORD WINAPI ThreadProc(_In_ LPVOID lpParameter)
+{
+	while (true)
+	{
+		char recvBuf[1024] = { 0 };
+		int recvCount = recv((SOCKET)lpParameter, recvBuf, 1024, 0);
 		if (recvCount == SOCKET_ERROR)
 		{
 			printf("recv error,error code : %d \n", WSAGetLastError());
@@ -63,15 +76,17 @@ int main()
 		printf("Bytes recvCount£º%d \n", recvCount);
 		printf("%s\n", recvBuf);
 
-		if (send(hsocketAccept, recvBuf, strlen(recvBuf)+1, 0) == SOCKET_ERROR)
+		if (send((SOCKET)lpParameter, recvBuf, strlen(recvBuf) + 1, 0) == SOCKET_ERROR)
 		{
 			printf("send error,error code : %d \n", WSAGetLastError());
 			return 0;
 		}
-		shutdown(hsocketAccept, SD_BOTH);
+		if (strcmp(recvBuf, "close")==0)
+		{
+			break;
+		}
 	}
-	closesocket(hsocket);
-	WSACleanup();
-    return 1;
+	shutdown((SOCKET)lpParameter, SD_BOTH);
+	closesocket((SOCKET)lpParameter);
+	return 0;
 }
-
