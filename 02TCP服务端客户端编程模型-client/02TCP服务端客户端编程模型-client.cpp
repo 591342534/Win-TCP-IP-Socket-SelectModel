@@ -22,8 +22,13 @@ int main()
 		printf("hSocketCoont error,code: %d", WSAGetLastError());
 		return 0;
 	}
+	char ip[] = "127.000.000.001";
+
+
+	printf("输入服务端IP地址  \n");
+	scanf_s("%s", ip, sizeof(ip));
 	sockaddr_in si;
-	si.sin_addr.S_un.S_addr = inet_addr("172.16.42.133");
+	si.sin_addr.S_un.S_addr = inet_addr(ip);
 	si.sin_family = AF_INET;
 	si.sin_port = htons(10086);
 
