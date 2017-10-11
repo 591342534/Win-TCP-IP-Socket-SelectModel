@@ -25,6 +25,48 @@ struct IpPack
 
 };
 
+typedef struct stTCP
+{
+	WORD wSourcePort;
+	WORD wDestPort;
+	DWORD dwSequenNum;
+	DWORD dwAckNum;
+	WORD wOffsetReserveFlag;
+	WORD wWindow;
+	WORD wCheckSum;
+	WORD wUrgentPinger;
+	DWORD dwOptionPedding;
+}stTcp;
+
+void TCPunPack(const struct pcap_pkthdr *myPcap, const u_char *myChar)
+{
+	printf("============TCP包解析===============\n");
+	stTcp* myTcp = (stTcp*)(myChar + 34);
+	printf("SourcePort:%d\n", ntohs(myTcp->wSourcePort));
+	printf("DestPort:%d\n", ntohs(myTcp->wDestPort));
+	printf("序列号:%u\n", ntohl(myTcp->dwSequenNum));
+	printf("确认号:%u\n", ntohl(myTcp->dwAckNum));
+	printf("====================================\n\n\n\n");
+}
+
+typedef struct stUDP
+{
+	WORD wSourcePort;
+	WORD wDestPort;
+	WORD wLength;
+	WORD wCheckSum;
+}stUdp;
+
+void UDPunPack(const struct pcap_pkthdr *myPcap, const u_char *myChar)
+{
+	printf("============UDP包解析===============\n");
+	stUdp* myUdp = (stUdp*)(myChar + 34);
+	printf("SourcePort:%d\n", ntohs(myUdp->wSourcePort));
+	printf("DestPort:%d\n", ntohs(myUdp->wDestPort));
+	printf("长度:%u\n", ntohs(myUdp->wLength));
+	printf("检验和:%u\n", ntohs(myUdp->wCheckSum));
+	printf("====================================\n\n\n\n");
+}
 void ipUnPack(const struct pcap_pkthdr *header, const u_char *pkt_data)
 {
 
@@ -92,6 +134,15 @@ void ipUnPack(const struct pcap_pkthdr *header, const u_char *pkt_data)
 	printf("DestIP:%s\n", inet_ntoa(addr));
 
 	printf("===============================\n");
+	switch (g_mackDump[23])
+	{
+	case 6:
+		TCPunPack(header, pkt_data);
+		break;
+	case 17:
+		UDPunPack(header, pkt_data);
+		break;
+	}
 }
 
 void packet_handler(u_char *param, const struct pcap_pkthdr *header, const u_char *pkt_data)
